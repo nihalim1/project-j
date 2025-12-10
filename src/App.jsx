@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import LoginPage from "./pages/LoginPage.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import UserDashboard from "./pages/UserDashboard.jsx";
@@ -59,8 +60,9 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
+    <LanguageProvider>
+      <Router>
+        <Routes>
         <Route
           path="/"
           element={
@@ -92,8 +94,9 @@ function App() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 }
 

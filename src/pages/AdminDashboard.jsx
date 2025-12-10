@@ -2,14 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 import { auth, db } from "../firebase";
 import AdminSidebar from "../components/admin/AdminSidebar";
 import { UserTable, UserModal } from "../components/admin/UserComponents";
 import DashboardStats from "../components/admin/DashboardStats";
 import Toast from "../components/common/Toast";
 import ConfirmModal from "../components/common/ConfirmModal";
+import ContentManager from "../components/admin/ContentManager";
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("users");
@@ -122,7 +125,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/30 flex">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-emerald-50/30 flex">
       {/* Sidebar */}
       <AdminSidebar
         sidebarOpen={sidebarOpen}
@@ -133,7 +136,7 @@ export default function AdminDashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 transition-all duration-300 min-w-0">
+      <main className="flex-1 transition-all duration-300 min-w-0 h-screen overflow-y-auto">
         <div className="p-4 md:p-6 lg:p-8">
           {/* Mobile Menu Button */}
           <button
@@ -181,6 +184,13 @@ export default function AdminDashboard() {
               <div>
                 <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-6">ตั้งค่า</h2>
                 <p className="text-slate-600">เนื้อหาสำหรับหน้าตั้งค่า</p>
+              </div>
+            )}
+
+            {activeMenu === "content" && (
+              <div className="space-y-4">
+                <h2 className="text-xl md:text-2xl font-bold text-slate-800">จัดการเนื้อหา</h2>
+                <ContentManager showToast={showToast} />
               </div>
             )}
           </div>

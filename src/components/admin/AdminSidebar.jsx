@@ -4,6 +4,7 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen, activeMenu, 
   const menuItems = [
     { id: "dashboard", label: "แดชบอร์ด", icon: FiBarChart2 },
     { id: "users", label: "จัดการผู้ใช้", icon: FiUsers },
+    { id: "content", label: "จัดการเนื้อหา", icon: FiSettings },
     { id: "settings", label: "ตั้งค่า", icon: FiSettings },
   ];
 

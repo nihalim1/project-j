@@ -1,18 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import Toast from "../components/common/Toast";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "../contexts/LanguageContext";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
+  const { currentLanguage, changeLanguage } = useLanguage();
   const navigate = useNavigate();
+  
+  // Function to change language
   const [mounted, setMounted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode] = useState("login"); // login | register
   const [form, setForm] = useState({ email: "", password: "", name: "", confirm: "" });
   const [errors, setErrors] = useState({ email: "", password: "", name: "", confirm: "" });
   const [toast, setToast] = useState(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);
@@ -34,6 +44,35 @@ export default function LoginPage() {
     }
     setErrors(nextErrors);
     return nextErrors;
+  };
+
+  const onForgotPassword = async () => {
+    const email = forgotEmail.trim();
+    if (!email) {
+      setToast({ message: "กรุณากรอกอีเมล", type: "error" });
+      return;
+    }
+    if (!/.+@.+\..+/.test(email)) {
+      setToast({ message: "รูปแบบอีเมลไม่ถูกต้อง", type: "error" });
+      return;
+    }
+
+    try {
+      setForgotSubmitting(true);
+      await sendPasswordResetEmail(auth, email);
+      setToast({ message: "ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว", type: "success" });
+      setForgotOpen(false);
+      setForgotEmail("");
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      let message = "ไม่สามารถส่งลิงก์รีเซ็ตรหัสผ่านได้";
+      if (error.code === "auth/user-not-found") {
+        message = "ไม่พบผู้ใช้ที่ใช้อีเมลนี้";
+      }
+      setToast({ message, type: "error" });
+    } finally {
+      setForgotSubmitting(false);
+    }
   };
 
   const checkUserRoleAndNavigate = async (uid) => {
@@ -168,23 +207,24 @@ export default function LoginPage() {
       
       }}
     >
-      
+
       {/* Centered card container */}
       <div className={`relative w-full max-w-5xl transition-all duration-500 ease-out ${mounted ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-xl border border-slate-200/50">
           {/* Left: Hero */}
           <section className="relative flex items-center justify-center overflow-hidden bg-emerald-400 p-6 md:p-12 min-h-48 md:min-h-auto">
-            
+            <div className="absolute top-4 left-4 z-20">
+              <LanguageSwitcher />
+            </div>
+
             {/* Center text */}
             <div className="relative z-10 text-center text-white max-w-md">
               <h1 className="text-[22px] md:text-[30px] font-bold leading-tight mb-4">
-                {isLogin ? "ยินดีต้อนรับ" : "เริ่มต้นใหม่"}
+                {isLogin ? t("hero.titleLogin") : t("hero.titleRegister")}
               </h1>
               <div className="h-0.5 w-12 bg-white/60 mx-auto mb-5" />
               <p className="text-[15px] md:text-[17px] text-white/90 leading-relaxed">
-                {isLogin
-                  ? "เข้าสู่ระบบเพื่อเข้าถึงเว็บแอปพลิเคชัน"
-                  : "สร้างบัญชีใหม่เพื่อเริ่มใช้งาน"}
+                {isLogin ? t("hero.subtitleLogin") : t("hero.subtitleRegister")}
               </p>
             </div>
           </section>
@@ -203,7 +243,7 @@ export default function LoginPage() {
                         : "text-slate-600 hover:text-slate-800"
                     }`}
                   >
-                    เข้าสู่ระบบ
+                    {t("tabs.login")}
                   </button>
                   <button
                     type="button"
@@ -214,16 +254,14 @@ export default function LoginPage() {
                         : "text-slate-600 hover:text-slate-800"
                     }`}
                   >
-                    สมัครสมาชิก
+                    {t("tabs.register")}
                   </button>
                 </div>
                 <h2 className="text-[20px] md:text-[26px] font-bold text-slate-800 mb-1.5">
-                  {isLogin ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}
+                  {isLogin ? t("form.headingLogin") : t("form.headingRegister")}
                 </h2>
                 <p className="text-[13px] md:text-[15px] text-slate-500">
-                  {isLogin
-                    ? "กรอกอีเมลและรหัสผ่านของคุณเพื่อเข้าเว็บแอปพลิเคชัน"
-                    : "สร้างบัญชีใหม่ด้วยอีเมล ชื่อ และรหัสผ่านที่คุณต้องการ"}
+                  {isLogin ? t("form.descLogin") : t("form.descRegister")}
                 </p>
               </div>
 
@@ -235,12 +273,12 @@ export default function LoginPage() {
                     {!isLogin && (
                       <div className="space-y-1">
                         <label htmlFor="name" className="block text-[13px] md:text-[15px] font-medium text-slate-700">
-                          ชื่อ - นามสกุล
+                          {t("form.name")}
                         </label>
                         <input
                           id="name"
                           type="text"
-                          placeholder="กรอกชื่อของคุณ"
+                          placeholder={t("placeholder.name")}
                           value={form.name}
                           onChange={(e) => setForm({ ...form, name: e.target.value })}
                           className={`w-full rounded-lg border px-4 py-2 text-[15px] md:text-[17px] text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
@@ -257,12 +295,12 @@ export default function LoginPage() {
                     {/* Email */}
                     <div className="space-y-1">
                       <label htmlFor="email" className="block text-[13px] md:text-[15px] font-medium text-slate-700">
-                        อีเมล
+                        {t("form.email")}
                       </label>
                       <input
                         id="email"
                         type="email"
-                        placeholder="example@email.com"
+                        placeholder={t("placeholder.email")}
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         className={`w-full rounded-lg border px-4 py-2 text-[15px] md:text-[17px] text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
@@ -278,12 +316,12 @@ export default function LoginPage() {
                     {/* Password */}
                     <div className="space-y-1">
                       <label htmlFor="password" className="block text-[13px] md:text-[15px] font-medium text-slate-700">
-                        รหัสผ่าน
+                        {t("form.password")}
                       </label>
                       <input
                         id="password"
                         type="password"
-                        placeholder="••••••••"
+                        placeholder={t("placeholder.password")}
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         className={`w-full rounded-lg border px-4 py-2 text-[15px] md:text-[17px] text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
@@ -293,19 +331,35 @@ export default function LoginPage() {
                         }`}
                         autoComplete={isLogin ? "current-password" : "new-password"}
                       />
-                      {errors.password && <p className="text-[11px] md:text-[13px] text-red-600 mt-0.5">{errors.password}</p>}
+                      {errors.password && (
+                        <p className="text-[11px] md:text-[13px] text-red-600 mt-0.5">{errors.password}</p>
+                      )}
+                      {isLogin && (
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setForgotEmail(form.email || "");
+                              setForgotOpen(true);
+                            }}
+                            className="mt-1 text-[11px] md:text-[13px] text-emerald-600 hover:text-emerald-700 underline"
+                          >
+                            ลืมรหัสผ่าน?
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Confirm - only for register */}
                     {!isLogin && (
                       <div className="space-y-1">
                         <label htmlFor="confirm" className="block text-[13px] md:text-[15px] font-medium text-slate-700">
-                          ยืนยันรหัสผ่าน
+                          {t("form.confirm")}
                         </label>
                         <input
                           id="confirm"
                           type="password"
-                          placeholder="••••••••"
+                          placeholder={t("placeholder.confirm")}
                           value={form.confirm}
                           onChange={(e) => setForm({ ...form, confirm: e.target.value })}
                           className={`w-full rounded-lg border px-4 py-2 text-[15px] md:text-[17px] text-slate-900 placeholder:text-slate-400 outline-none transition-all ${
@@ -324,7 +378,13 @@ export default function LoginPage() {
                       disabled={submitting}
                       className="mt-4 w-full rounded-lg bg-emerald-500 px-4 py-2.5 font-semibold text-white text-[15px] md:text-[17px] shadow-sm transition-all hover:shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {submitting ? (isLogin ? "กำลังเข้าสู่ระบบ..." : "กำลังสมัครสมาชิก...") : isLogin ? "เข้าสู่ระบบ" : "สมัครสมาชิก"}
+                      {submitting
+                        ? isLogin
+                          ? "กำลังเข้าสู่ระบบ..."
+                          : "กำลังสมัครสมาชิก..."
+                        : isLogin
+                        ? t("button.submitLogin")
+                        : t("button.submitRegister")}
                     </button>
 
                     <div className="relative my-4">
@@ -350,31 +410,31 @@ export default function LoginPage() {
                           <path fill="#FBBC05" d="M12 21c2.46 0 4.53-.81 6.04-2.2l-3.29-2.56c-.91.58-2.07.92-3.25.92-2.5 0-4.61-1.9-5.38-4.48L3.2 16.08C4.5 19.2 8 21 12 21Z"/>
                           <path fill="none" d="M3 3h18v18H3z"/>
                         </svg>
-                        {isLogin ? "เข้าสู่ระบบด้วย Google" : "สมัครด้วย Google"}
+                        {isLogin ? t("button.googleLogin") : t("button.googleRegister")}
                       </span>
                     </button>
 
                     <p className="mt-4 text-center text-[13px] md:text-[15px] text-slate-600">
                       {isLogin ? (
                         <>
-                          ยังไม่มีบัญชี?{" "}
+                          {t("link.toRegister")}
                           <button
                             type="button"
                             className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                             onClick={() => setMode("register")}
                           >
-                            สมัครสมาชิก
+                            {t("button.switchToRegister")}
                           </button>
                         </>
                       ) : (
                         <>
-                          มีบัญชีอยู่แล้ว?{" "}
+                          {t("link.toLogin")}
                           <button
                             type="button"
                             className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
                             onClick={() => setMode("login")}
                           >
-                            เข้าสู่ระบบ
+                            {t("button.switchToLogin")}
                           </button>
                         </>
                       )}
@@ -384,6 +444,47 @@ export default function LoginPage() {
           </section>
         </div>
       </div>
+
+      {forgotOpen && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4" onClick={() => !forgotSubmitting && setForgotOpen(false)}>
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-slate-800 mb-1">ลืมรหัสผ่าน</h3>
+            <p className="text-sm text-slate-600 mb-4">กรอกอีเมลของคุณเพื่อรับลิงก์รีเซ็ตรหัสผ่าน</p>
+            <div className="space-y-2 mb-4">
+              <label className="text-sm font-medium text-slate-700">อีเมล</label>
+              <input
+                type="email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 outline-none"
+                placeholder="example@email.com"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => !forgotSubmitting && setForgotOpen(false)}
+                className="px-4 py-2 rounded-lg border border-slate-300 text-sm text-slate-700 hover:bg-slate-100"
+                disabled={forgotSubmitting}
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={onForgotPassword}
+                disabled={forgotSubmitting}
+                className="px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-60"
+              >
+                {forgotSubmitting ? "กำลังส่ง..." : "ส่งลิงก์รีเซ็ต"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </main>
   );
