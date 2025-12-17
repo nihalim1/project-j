@@ -113,8 +113,6 @@ export default function HerbKnowledge() {
               {modalItem.link && (
                 <a
                   href={modalItem.link}
-                  target="_blank"
-                  rel="noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600"
                 >
                   {t("common.openLink")}

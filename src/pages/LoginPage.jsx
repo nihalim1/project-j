@@ -214,7 +214,7 @@ export default function LoginPage() {
           {/* Left: Hero */}
           <section className="relative flex items-center justify-center overflow-hidden bg-emerald-400 p-6 md:p-12 min-h-48 md:min-h-auto">
             <div className="absolute top-4 left-4 z-20">
-              <LanguageSwitcher />
+              <LanguageSwitcher mobileUp={false} />
             </div>
 
             {/* Center text */}

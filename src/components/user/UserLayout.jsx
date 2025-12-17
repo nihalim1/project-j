@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FiUser, FiChevronDown, FiLogOut, FiGlobe, FiMenu } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../LanguageSwitcher";
@@ -10,6 +11,7 @@ import LanguageSwitcher from "../LanguageSwitcher";
  * @param {string} props.activeSection
  * @param {(id:string)=>void} props.onChangeSection
  * @param {()=>void} props.onLogout
+ * @param {string} [props.userName]
  * @param {React.ReactNode} props.children
  */
 export default function UserLayout({
@@ -19,6 +21,7 @@ export default function UserLayout({
   onChangeSection,
   onLogout,
   onProfileClick,
+  userName,
   children,
 }) {
   const { t } = useTranslation();
@@ -37,10 +40,20 @@ export default function UserLayout({
           >
             <FiMenu className="text-lg" />
           </button>
-          <div className="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
-            L
-          </div>
-          <span className="text-sm md:text-base font-semibold text-slate-800">{brand}</span>
+          <Link to="/user" className="flex items-center gap-2">
+            <div>
+              <img
+                src="/src/assets/react.svg"
+                alt="Logo"
+                className="block h-8 w-auto md:h-10"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+            <span className="hidden sm:block leading-none text-emerald-600 text-sm md:text-base font-semibold">
+              เปลี่ยนเอาเอง
+            </span>
+          </Link>
         </div>
         <div className="flex items-center gap-3 relative">
           <div className="hidden md:flex items-center gap-2">
@@ -53,6 +66,11 @@ export default function UserLayout({
             <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center">
               <FiUser className="text-lg" />
             </div>
+            {userName && (
+              <span className="hidden sm:inline text-sm font-medium text-slate-800 max-w-[200px] md:max-w-[260px] leading-snug break-words">
+                {userName}
+              </span>
+            )}
             <FiChevronDown className="text-slate-600" />
           </button>
 

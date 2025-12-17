@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const LanguageSwitcher = () => {
+const LanguageSwitcher = ({ mobileUp = true }) => {
   const { currentLanguage, changeLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
 
@@ -13,6 +13,10 @@ const LanguageSwitcher = () => {
   };
 
   const displayCode = currentLanguage === 'ms' ? 'MS' : 'TH';
+
+  const mobilePositionClass = mobileUp
+    ? 'bottom-9 origin-bottom-right'
+    : 'top-full mt-1 origin-top-right';
 
   return (
     <div className="relative inline-block text-left">
@@ -27,7 +31,9 @@ const LanguageSwitcher = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1 w-20 origin-top-right rounded-md border border-slate-200 bg-white shadow-lg z-20">
+        <div
+          className={`absolute right-0 ${mobilePositionClass} md:bottom-auto md:top-full md:mt-1 w-20 md:origin-top-right rounded-md border border-slate-200 bg-white shadow-lg z-20 max-h-48 overflow-y-auto`}
+        >
           <button
             type="button"
             onClick={() => handleSelect('th')}

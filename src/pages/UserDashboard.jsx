@@ -45,6 +45,10 @@ export default function UserDashboard() {
     setProfileModal(true);
   };
 
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -70,6 +74,7 @@ export default function UserDashboard() {
         onChangeSection={setActiveSection}
         onLogout={handleLogout}
         onProfileClick={handleOpenProfile}
+        userName={profileForm.name}
       >
         {activeSection === "explore" && <Explore360 />}
         {activeSection === "museum" && <Museum />}

@@ -15,24 +15,6 @@ export default function DashboardStats({ users, variant = "default" }) {
       iconColor: "text-blue-500",
       borderColor: "border-blue-200",
     },
-    {
-      label: "ผู้ใช้ทั่วไป",
-      value: regularUsers,
-      icon: FiUser,
-      gradient: "from-emerald-500 to-emerald-600",
-      bgColor: "bg-emerald-50",
-      iconColor: "text-emerald-500",
-      borderColor: "border-emerald-200",
-    },
-    {
-      label: "ผู้ดูแลระบบ",
-      value: adminUsers,
-      icon: FiShield,
-      gradient: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-50",
-      iconColor: "text-purple-500",
-      borderColor: "border-purple-200",
-    },
   ];
 
   // Variant 1: Default (Current)
