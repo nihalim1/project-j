@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FiUser, FiChevronDown, FiLogOut, FiGlobe, FiMenu } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../LanguageSwitcher";
+import logoUrl from "../../assets/react.svg";
 
 /**
  * @param {Object} props
@@ -15,7 +16,7 @@ import LanguageSwitcher from "../LanguageSwitcher";
  * @param {React.ReactNode} props.children
  */
 export default function UserLayout({
-  brand = "Local Explorer",
+  brand = "เปลียนเอาเอง",
   menuItems = [],
   activeSection,
   onChangeSection,
@@ -32,7 +33,7 @@ export default function UserLayout({
     <div className="min-h-screen bg-slate-50">
       {/* Navbar */}
       <header className="sticky top-0 z-30 w-full bg-white border-b border-slate-200 px-4 md:px-8 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             className="md:hidden p-2 rounded-full hover:bg-slate-100 text-slate-600"
             onClick={() => setNavOpen(true)}
@@ -40,18 +41,18 @@ export default function UserLayout({
           >
             <FiMenu className="text-lg" />
           </button>
-          <Link to="/user" className="flex items-center gap-2">
-            <div>
+          <Link to="/user" className="flex items-center gap-2 min-w-0">
+            <div className="shrink-0">
               <img
-                src="/src/assets/react.svg"
-                alt="Logo"
-                className="block h-8 w-auto md:h-10"
+                src={logoUrl}
+                alt={brand}
+                className="block h-7 w-auto md:h-8"
                 loading="eager"
                 decoding="async"
               />
             </div>
-            <span className="hidden sm:block leading-none text-emerald-600 text-sm md:text-base font-semibold">
-              เปลี่ยนเอาเอง
+            <span className="hidden sm:block leading-none text-slate-800 text-sm md:text-base font-semibold truncate max-w-[160px] md:max-w-[240px]">
+              {brand}
             </span>
           </Link>
         </div>
@@ -108,11 +109,9 @@ export default function UserLayout({
           />
           <div className="fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-xl md:hidden flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
-                  L
-                </div>
-                <span className="text-base font-semibold text-slate-800">{brand}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <img src={logoUrl} alt={brand} className="h-8 w-auto shrink-0" loading="eager" decoding="async" />
+                <span className="text-base font-semibold text-slate-800 truncate">{brand}</span>
               </div>
               <button
                 onClick={() => setNavOpen(false)}
