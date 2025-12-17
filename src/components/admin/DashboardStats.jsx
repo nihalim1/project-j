@@ -1,19 +1,27 @@
-import { FiUsers, FiUser, FiShield } from "react-icons/fi";
+import { FiUser, FiShield } from "react-icons/fi";
 
 export default function DashboardStats({ users, variant = "default" }) {
-  const totalUsers = users.length;
   const regularUsers = users.filter((u) => u.role === "user").length;
   const adminUsers = users.filter((u) => u.role === "admin").length;
 
   const stats = [
     {
-      label: "ผู้ใช้ทั้งหมด",
-      value: totalUsers,
-      icon: FiUsers,
-      gradient: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-500",
-      borderColor: "border-blue-200",
+      label: "ผู้ใช้งาน",
+      value: regularUsers,
+      icon: FiUser,
+      gradient: "from-emerald-500 to-emerald-600",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      borderColor: "border-emerald-200",
+    },
+    {
+      label: "แอดมิน",
+      value: adminUsers,
+      icon: FiShield,
+      gradient: "from-violet-500 to-violet-600",
+      bgColor: "bg-violet-50",
+      iconColor: "text-violet-600",
+      borderColor: "border-violet-200",
     },
   ];
 
